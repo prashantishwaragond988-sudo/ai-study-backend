@@ -14,7 +14,8 @@ intentionally not implemented yet.
 - JSON response helpers.
 - Central JSON error handling.
 - Basic structured logging.
-- Firebase Admin SDK initialization from `serviceAccountKey.json`.
+- Firebase Admin SDK initialization from `serviceAccountKey.json` locally or
+  `FIREBASE_SERVICE_ACCOUNT_BASE64` in production.
 - Firestore service layer.
 - `/health` endpoint.
 - `/firestore-test` endpoint.
@@ -104,6 +105,8 @@ Required Firebase values:
 ```text
 FIREBASE_PROJECT_ID=your-firebase-project-id
 FIREBASE_CREDENTIALS_PATH=serviceAccountKey.json
+# Optional for cloud deployment:
+FIREBASE_SERVICE_ACCOUNT_BASE64=
 ```
 
 Required Gmail SMTP values:
@@ -147,6 +150,69 @@ By default the server runs at:
 
 ```text
 http://127.0.0.1:5000
+```
+
+## Render Deployment
+
+Firebase Admin credentials work in two modes:
+
+- Local development: set `FIREBASE_CREDENTIALS_PATH=serviceAccountKey.json`.
+- Render/production: set `FIREBASE_SERVICE_ACCOUNT_BASE64` to a Base64-encoded
+  copy of `serviceAccountKey.json`.
+
+When `FIREBASE_SERVICE_ACCOUNT_BASE64` exists, the backend initializes Firebase
+Admin directly from that decoded JSON. If it is empty, the backend falls back to
+`FIREBASE_CREDENTIALS_PATH`, preserving local development behavior.
+
+### Generate Firebase Base64 Value
+
+From the `backend` directory on Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("serviceAccountKey.json"))
+```
+
+From the `backend` directory on macOS/Linux:
+
+```bash
+base64 -w 0 serviceAccountKey.json
+```
+
+If your macOS `base64` command does not support `-w`, use:
+
+```bash
+base64 serviceAccountKey.json | tr -d '\n'
+```
+
+Copy the full output and add it to Render as the
+`FIREBASE_SERVICE_ACCOUNT_BASE64` environment variable. Do not commit the JSON
+file or the Base64 value to git.
+
+### Render Environment Variables
+
+Set these in the Render service environment:
+
+```text
+FLASK_ENV=production
+FLASK_DEBUG=false
+FLASK_HOST=0.0.0.0
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_SERVICE_ACCOUNT_BASE64=your-base64-service-account-json
+JWT_SECRET_KEY=use-a-long-random-production-secret
+JWT_ACCESS_TOKEN_EXPIRES_MINUTES=60
+JWT_REFRESH_TOKEN_EXPIRES_DAYS=30
+EMAIL_PROVIDER=gmail
+EMAIL_FROM=your-gmail-address@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-gmail-address@gmail.com
+SMTP_PASSWORD=your-gmail-app-password
+```
+
+Use a production-safe start command such as:
+
+```bash
+gunicorn run:app
 ```
 
 ## Verify Existing Backend

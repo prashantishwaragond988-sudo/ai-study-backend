@@ -11,13 +11,14 @@ class Config:
     FLASK_ENV = os.getenv("FLASK_ENV", "development")
     FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() == "true"
     FLASK_HOST = os.getenv("FLASK_HOST", "127.0.0.1")
-    FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
+    FLASK_PORT = int(os.getenv("PORT", os.getenv("FLASK_PORT", "5000")))
     APP_NAME = os.getenv("APP_NAME", "AI Study App Backend")
     API_PREFIX = os.getenv("API_PREFIX", "/api")
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 
     # Firebase Admin configuration.
     FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID", "")
+    FIREBASE_SERVICE_ACCOUNT_BASE64 = os.getenv("FIREBASE_SERVICE_ACCOUNT_BASE64", "")
     FIREBASE_CREDENTIALS_PATH = os.getenv(
         "FIREBASE_CREDENTIALS_PATH",
         str(BASE_DIR / "serviceAccountKey.json"),
