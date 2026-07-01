@@ -8,7 +8,7 @@ from app.auth.validators import (
     validate_refresh_token_payload,
 )
 from app.common.responses import success_response
-from app.services.email_service import EmailService
+from app.services.email_service import ResendEmailService
 from app.services.jwt_service import JwtService
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
@@ -17,7 +17,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 @auth_bp.post("/register")
 def register():
     payload = validate_registration_payload(request.get_json(silent=True) or {})
-    auth_service = AuthService(email_service=EmailService.from_app(current_app))
+    auth_service = AuthService(email_service=ResendEmailService.from_app(current_app))
     user = auth_service.register_user(payload)
     return success_response(
         {
@@ -31,7 +31,7 @@ def register():
 @auth_bp.post("/verify-email-otp")
 def verify_email_otp():
     payload = validate_email_otp_payload(request.get_json(silent=True) or {})
-    auth_service = AuthService(email_service=EmailService.from_app(current_app))
+    auth_service = AuthService(email_service=ResendEmailService.from_app(current_app))
     user = auth_service.verify_email_otp(payload)
     return success_response(
         {

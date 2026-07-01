@@ -38,13 +38,9 @@ class Config:
     CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
     CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
 
-    # Email configuration.
-    EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "")
+    # Resend email configuration.
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
     EMAIL_FROM = os.getenv("EMAIL_FROM", "")
-    SMTP_HOST = os.getenv("SMTP_HOST", "")
-    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-    SMTP_USERNAME = os.getenv("SMTP_USERNAME", "")
-    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
     # Future SMS and WhatsApp configuration.
     SMS_PROVIDER = os.getenv("SMS_PROVIDER", "")

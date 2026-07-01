@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import hmac
 from hashlib import sha256
@@ -11,7 +10,7 @@ from firebase_admin import firestore
 from google.cloud.firestore_v1 import FieldFilter
 
 from app.common.errors import AppError
-from app.services.email_service import EmailService
+from app.services.email_service import ResendEmailService
 from app.services.jwt_service import JwtService
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 class AuthService:
     def __init__(
         self,
-        email_service: EmailService | None = None,
+        email_service: ResendEmailService | None = None,
         jwt_service: JwtService | None = None,
     ):
         self._db = firestore.client()
@@ -32,7 +31,7 @@ class AuthService:
             raise AppError("Email service is not available.", 500)
         if not self._email_service.is_configured:
             raise AppError(
-                "Email service is not configured. Set Gmail SMTP values in .env.",
+                "Email service is not configured. Set RESEND_API_KEY and EMAIL_FROM.",
                 503,
             )
 
@@ -63,17 +62,10 @@ class AuthService:
                 email=payload["email"],
                 otp=otp,
             )
-        except AppError as error:
-            if self._should_skip_email_delivery_failure(error):
-                logger.info(
-                    "Registration OTP for %s is %s. Email delivery failed on Render.",
-                    payload["email"],
-                    otp,
-                )
-            else:
-                user_ref.delete()
-                otp_ref.delete()
-                raise
+        except AppError:
+            user_ref.delete()
+            otp_ref.delete()
+            raise
 
         logger.info("Registered pending user %s.", payload["email"])
         return {
@@ -340,9 +332,6 @@ class AuthService:
         if self._jwt_service is None:
             raise AppError("JWT service is not available.", 500)
         return self._jwt_service
-
-    def _should_skip_email_delivery_failure(self, error: AppError) -> bool:
-        return error.status_code == 502 and os.getenv("RENDER", "").lower() == "true"
 
     def _generate_otp(self) -> str:
         return f"{random.SystemRandom().randint(0, 999999):06d}"

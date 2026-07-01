@@ -25,7 +25,7 @@ intentionally not implemented yet.
 - `POST /api/auth/refresh-token`.
 - `POST /api/auth/logout`.
 - Bcrypt password hashing.
-- Gmail SMTP email delivery for registration OTP.
+- Resend email delivery for registration OTP.
 - One-time OTP records with 5-minute expiry.
 - PyJWT access and refresh tokens.
 - Firestore `user_sessions` records with hashed refresh tokens.
@@ -71,7 +71,7 @@ backend/
 - `app/auth/routes.py`: Registration and email OTP verification endpoints.
 - `app/auth/services.py`: Registration, duplicate checks, password hashing, OTP storage, OTP verification, login, refresh-token session checks, and logout.
 - `app/auth/validators.py`: Request validation for registration, OTP verification, login, refresh-token, and logout.
-- `app/services/email_service.py`: Gmail SMTP email delivery.
+- `app/services/email_service.py`: Resend email delivery.
 - `app/services/jwt_service.py`: JWT creation and refresh-token verification.
 - `app/services/firebase_admin_service.py`: Firebase Admin SDK initialization.
 - `app/services/firestore_service.py`: Firestore test service.
@@ -109,18 +109,16 @@ FIREBASE_CREDENTIALS_PATH=serviceAccountKey.json
 FIREBASE_SERVICE_ACCOUNT_BASE64=
 ```
 
-Required Gmail SMTP values:
+Required Resend email values:
 
 ```text
-EMAIL_PROVIDER=gmail
-EMAIL_FROM=your-gmail-address@gmail.com
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your-gmail-address@gmail.com
-SMTP_PASSWORD=your-gmail-app-password
+RESEND_API_KEY=your-resend-api-key
+EMAIL_FROM=AI Study App <onboarding@your-domain.com>
 ```
 
-Use a Gmail App Password, not your normal Gmail password.
+Use a verified Resend domain for production sending. For development testing,
+you can use a Resend test sender only within Resend's allowed test-recipient
+limits.
 
 Required JWT value:
 
@@ -201,13 +199,12 @@ FIREBASE_SERVICE_ACCOUNT_BASE64=your-base64-service-account-json
 JWT_SECRET_KEY=use-a-long-random-production-secret
 JWT_ACCESS_TOKEN_EXPIRES_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRES_DAYS=30
-EMAIL_PROVIDER=gmail
-EMAIL_FROM=your-gmail-address@gmail.com
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your-gmail-address@gmail.com
-SMTP_PASSWORD=your-gmail-app-password
+RESEND_API_KEY=your-resend-api-key
+EMAIL_FROM=AI Study App <onboarding@your-domain.com>
 ```
+
+`EMAIL_FROM` must use a sender/domain verified in Resend, otherwise Resend will
+reject outgoing OTP emails and registration will return an email delivery error.
 
 Use a production-safe start command such as:
 
