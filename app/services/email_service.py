@@ -78,6 +78,6 @@ class EmailService:
                 smtp.login(self.smtp_username, self.smtp_password)
                 smtp.send_message(message)
             logger.info("Sent registration OTP email to %s.", to_email)
-        except smtplib.SMTPException as error:
+        except (OSError, smtplib.SMTPException) as error:
             logger.exception("SMTP email delivery failed for %s.", to_email)
             raise AppError("Could not send verification email.", 502) from error

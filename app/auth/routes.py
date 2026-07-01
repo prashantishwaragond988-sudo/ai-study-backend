@@ -21,7 +21,7 @@ def register():
     user = auth_service.register_user(payload)
     return success_response(
         {
-            "message": "Registration created. Verification OTP sent to email.",
+            "message": "Registration created successfully.",
             "user": user,
         },
         201,

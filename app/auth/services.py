@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import hmac
 from hashlib import sha256
@@ -62,10 +63,17 @@ class AuthService:
                 email=payload["email"],
                 otp=otp,
             )
-        except AppError:
-            user_ref.delete()
-            otp_ref.delete()
-            raise
+        except AppError as error:
+            if self._should_skip_email_delivery_failure(error):
+                logger.info(
+                    "Registration OTP for %s is %s. Email delivery failed on Render.",
+                    payload["email"],
+                    otp,
+                )
+            else:
+                user_ref.delete()
+                otp_ref.delete()
+                raise
 
         logger.info("Registered pending user %s.", payload["email"])
         return {
@@ -332,6 +340,9 @@ class AuthService:
         if self._jwt_service is None:
             raise AppError("JWT service is not available.", 500)
         return self._jwt_service
+
+    def _should_skip_email_delivery_failure(self, error: AppError) -> bool:
+        return error.status_code == 502 and os.getenv("RENDER", "").lower() == "true"
 
     def _generate_otp(self) -> str:
         return f"{random.SystemRandom().randint(0, 999999):06d}"
