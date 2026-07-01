@@ -2,6 +2,7 @@ import logging
 
 from flask import Blueprint, current_app
 
+from app.auth.firebase_middleware import firebase_auth_required
 from app.common.responses import success_response
 from app.services.firestore_service import FirestoreService
 
@@ -10,6 +11,7 @@ firestore_bp = Blueprint("firestore", __name__)
 
 
 @firestore_bp.get("/firestore-test")
+@firebase_auth_required
 def firestore_test():
     firestore_service = FirestoreService()
     document = firestore_service.write_and_read_test_document()

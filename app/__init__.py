@@ -3,7 +3,6 @@ import logging
 from flask_cors import CORS
 from flask import Flask
 
-from app.auth.routes import auth_bp
 from app.common.errors import register_error_handlers
 from app.config import Config
 from app.firestore.routes import firestore_bp
@@ -21,7 +20,6 @@ def create_app() -> Flask:
 
     app.register_blueprint(health_bp)
     app.register_blueprint(firestore_bp)
-    app.register_blueprint(auth_bp)
     register_error_handlers(app)
 
     return app
