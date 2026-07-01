@@ -60,7 +60,10 @@ class ResendEmailService:
             logger.info("Sent registration OTP email to %s.", to_email)
         except Exception as error:
             logger.exception("Resend email delivery failed for %s.", to_email)
-            raise AppError("Could not send verification email.", 500) from error
+            raise AppError(
+                "Could not send verification email. Please try again later.",
+                502,
+            ) from error
 
 
 EmailService = ResendEmailService

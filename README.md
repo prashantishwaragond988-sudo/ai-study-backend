@@ -71,7 +71,7 @@ backend/
 - `app/auth/routes.py`: Registration and email OTP verification endpoints.
 - `app/auth/services.py`: Registration, duplicate checks, password hashing, OTP storage, OTP verification, login, refresh-token session checks, and logout.
 - `app/auth/validators.py`: Request validation for registration, OTP verification, login, refresh-token, and logout.
-- `app/services/email_service.py`: Resend email delivery.
+- `app/services/email_service.py`: `ResendEmailService`, which sends registration OTP email through the official Resend Python SDK.
 - `app/services/jwt_service.py`: JWT creation and refresh-token verification.
 - `app/services/firebase_admin_service.py`: Firebase Admin SDK initialization.
 - `app/services/firestore_service.py`: Firestore test service.
@@ -205,6 +205,17 @@ EMAIL_FROM=AI Study App <onboarding@your-domain.com>
 
 `EMAIL_FROM` must use a sender/domain verified in Resend, otherwise Resend will
 reject outgoing OTP emails and registration will return an email delivery error.
+
+Use these Render settings:
+
+```text
+Root Directory: backend
+Build Command: pip install -r requirements.txt
+Start Command: gunicorn run:app
+```
+
+If you deploy this backend repository by itself, leave Root Directory blank and
+use the same build and start commands.
 
 Use a production-safe start command such as:
 
@@ -504,6 +515,15 @@ Expired OTP:
 {
   "ok": false,
   "error": "OTP expired."
+}
+```
+
+Email delivery failure:
+
+```json
+{
+  "ok": false,
+  "error": "Could not send verification email. Please try again later."
 }
 ```
 
