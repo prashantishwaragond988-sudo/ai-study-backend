@@ -246,6 +246,59 @@ curl http://127.0.0.1:5000/health
 curl http://127.0.0.1:5000/firestore-test
 ```
 
+## Production Verification
+
+Production base URL:
+
+```text
+https://ai-study-backend-1-fk01.onrender.com
+```
+
+Public deployment checks:
+
+```bash
+curl https://ai-study-backend-1-fk01.onrender.com/
+curl https://ai-study-backend-1-fk01.onrender.com/health
+curl https://ai-study-backend-1-fk01.onrender.com/deployment
+```
+
+Expected root response:
+
+```json
+{
+  "app": "AI Study Backend",
+  "status": "running",
+  "version": "1.0"
+}
+```
+
+Expected health response:
+
+```json
+{
+  "status": "healthy",
+  "firebase": "connected",
+  "cloudinary": "connected"
+}
+```
+
+Available API routes:
+
+```text
+GET  /
+GET  /health
+GET  /deployment
+GET  /api/auth/me
+POST /api/auth/profile
+POST /api/auth/sync-verification
+POST /api/auth/record-login
+POST /api/auth/lookup-email
+POST /api/auth/logout
+POST /api/cloudinary/upload
+POST /api/cloudinary/delete
+GET  /firestore-test
+```
+
 Cloudinary delete requires a Firebase ID token:
 
 ```bash

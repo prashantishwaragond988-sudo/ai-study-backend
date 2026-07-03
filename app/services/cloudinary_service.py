@@ -3,6 +3,7 @@ import mimetypes
 from tempfile import NamedTemporaryFile
 
 import cloudinary
+import cloudinary.api
 import cloudinary.uploader
 from flask import current_app
 
@@ -50,6 +51,22 @@ class CloudinaryService:
     @property
     def is_configured(self) -> bool:
         return bool(self.cloud_name and self.api_key and self.api_secret)
+
+    def verify_environment(self) -> dict[str, bool]:
+        return {
+            "CLOUDINARY_CLOUD_NAME": bool(self.cloud_name),
+            "CLOUDINARY_API_KEY": bool(self.api_key),
+            "CLOUDINARY_API_SECRET": bool(self.api_secret),
+        }
+
+    def verify_connection(self) -> bool:
+        self._ensure_configured()
+        try:
+            cloudinary.api.ping()
+        except Exception as error:
+            logger.exception("Cloudinary connection check failed: %s", error)
+            raise AppError("Cloudinary is not connected.", 503) from error
+        return True
 
     def upload_file(
         self,

@@ -9,6 +9,7 @@ from app.cloudinary_routes.routes import cloudinary_bp
 from app.config import Config
 from app.firestore.routes import firestore_bp
 from app.health.routes import health_bp
+from app.services.cloudinary_service import CloudinaryService
 from app.services.firebase_admin_service import FirebaseAdminService
 
 
@@ -19,6 +20,8 @@ def create_app() -> Flask:
     _configure_logging()
     CORS(app, resources={r"/*": {"origins": app.config["CORS_ORIGINS"]}})
     FirebaseAdminService.from_app(app).initialize()
+    with app.app_context():
+        CloudinaryService.from_app().verify_connection()
 
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
