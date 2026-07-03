@@ -84,30 +84,22 @@ class CloudinaryService:
         )[0]
         self._validate_content_type(content_type, resource_type)
 
-        with NamedTemporaryFile(delete=True) as temp_file:
-            bytes_written = 0
-            while True:
-                chunk = file_storage.stream.read(1024 * 1024)
-                if not chunk:
-                    break
-                bytes_written += len(chunk)
-                if bytes_written > max_bytes:
-                    raise AppError("File is too large.", 413)
-                temp_file.write(chunk)
-            temp_file.flush()
+        file_bytes = file_storage.read()
+        if len(file_bytes) > max_bytes:
+            raise AppError("File is too large.", 413)
 
-            try:
-                result = cloudinary.uploader.upload(
-                    temp_file.name,
-                    folder=folder,
-                    resource_type=resource_type,
-                    use_filename=True,
-                    unique_filename=True,
-                    overwrite=False,
-                )
-            except Exception as error:
-                logger.exception("Cloudinary upload failed: %s", error)
-                raise AppError("Cloudinary upload failed.", 502) from error
+        try:
+            result = cloudinary.uploader.upload(
+                file_bytes,
+                folder=folder,
+                resource_type=resource_type,
+                use_filename=True,
+                unique_filename=True,
+                overwrite=False,
+            )
+        except Exception as error:
+            logger.exception("Cloudinary upload failed: %s", error)
+            raise AppError("Cloudinary upload failed.", 502) from error
 
         logger.info(
             "Uploaded Cloudinary asset public_id=%s resource_type=%s folder=%s",
