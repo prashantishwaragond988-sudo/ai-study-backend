@@ -2,9 +2,8 @@
 
 Flask backend for the AI Study App.
 
-Milestone 4 adds login with JWT access/refresh tokens. Password reset, SMS,
-WhatsApp, OCR, AI, Cloudinary uploads, Google login, and Flutter integration are
-intentionally not implemented yet.
+Milestone 4 adds login with JWT access/refresh tokens, Firebase profile sync,
+Firestore connectivity, and Cloudinary upload/delete helpers.
 
 ## What Is Included
 
@@ -29,7 +28,9 @@ intentionally not implemented yet.
 - One-time OTP records with 5-minute expiry.
 - PyJWT access and refresh tokens.
 - Firestore `user_sessions` records with hashed refresh tokens.
-- Placeholder service for future Cloudinary integration.
+- Reusable Cloudinary service configured from environment variables.
+- `POST /api/cloudinary/upload` for authenticated backend uploads.
+- `POST /api/cloudinary/delete` for authenticated asset cleanup.
 
 ## Folder Structure
 
@@ -128,6 +129,18 @@ JWT_ACCESS_TOKEN_EXPIRES_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRES_DAYS=30
 ```
 
+Required Cloudinary values:
+
+```text
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+Never expose `CLOUDINARY_API_SECRET` in the Flutter app. Flutter uploads should
+use unsigned upload presets, while deletes and signed backend uploads use the
+backend service.
+
 4. Add Firebase Admin credentials:
 
 Place the Firebase Admin service account file here:
@@ -201,6 +214,9 @@ JWT_ACCESS_TOKEN_EXPIRES_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRES_DAYS=30
 RESEND_API_KEY=your-resend-api-key
 EMAIL_FROM=AI Study App <onboarding@your-domain.com>
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 `EMAIL_FROM` must use a sender/domain verified in Resend, otherwise Resend will
@@ -228,6 +244,15 @@ gunicorn run:app
 ```bash
 curl http://127.0.0.1:5000/health
 curl http://127.0.0.1:5000/firestore-test
+```
+
+Cloudinary delete requires a Firebase ID token:
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/cloudinary/delete \
+  -H "Authorization: Bearer <firebase-id-token>" \
+  -H "Content-Type: application/json" \
+  -d "{\"publicIds\":[\"notes/uid/note-id/page-1\"],\"resourceType\":\"image\"}"
 ```
 
 ## Postman Examples
